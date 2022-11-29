@@ -1,6 +1,6 @@
 const { ClientSession } = require("mongodb");
 const ApiError = require("../api-error");
-const ContactService = require("../service/service");
+const CustomerService = require("../service/customerService");
 const MongoDB = require("../utils/mongodb.util");
 
 exports.create = async (req, res, next) => {
@@ -9,8 +9,8 @@ exports.create = async (req, res, next) => {
   }
 
   try {
-    const contactService = new ContactService(MongoDB.client);
-    const document = await contactService.create(req.body);
+    const customerService = new CustomerService(MongoDB.client);
+    const document = await customerService.create(req.body);
     return res.send(document);
   } catch (error) {
     return next(
@@ -21,8 +21,8 @@ exports.create = async (req, res, next) => {
 
 exports.findOne = async (req, res, next) => {
   try {
-    const contactService = new ContactService(MongoDB.client);
-    const document = await contactService.findById(req.params.id);
+    const customerService = new CustomerService(MongoDB.client);
+    const document = await customerService.findById(req.params.id);
     if (!document) {
       return next(new ApiError(404, "Contact not found"));
     }
@@ -37,12 +37,12 @@ exports.findOne = async (req, res, next) => {
 exports.findAll = async (req, res, next) => {
   let documents = [];
   try {
-    const contactService = new ContactService(MongoDB.client);
+    const customerService = new CustomerService(MongoDB.client);
     const { name } = req.query;
     if (name) {
-      documents = await contactService.findByName(name);
+      documents = await customerService.findByName(name);
     } else {
-      documents = await contactService.find({});
+      documents = await customerService.find({});
     }
   } catch (error) {
     console.log(error);
@@ -59,8 +59,8 @@ exports.update = async (req, res, next) => {
     return next(new ApiError(400, "Data to update can not be empty"));
   }
   try {
-    const contactService = new ContactService(MongoDB.client);
-    const document = await contactService.update(req.params.id, req.body);
+    const customerService = new CustomerService(MongoDB.client);
+    const document = await customerService.update(req.params.id, req.body);
     if (!document) {
       return next(new ApiError(404, "Contact not found"));
     }
@@ -75,8 +75,9 @@ exports.update = async (req, res, next) => {
 // Delete a contact with the specified id in the request
 exports.delete = async (req, res, next) => {
   try {
-    const contactService = new ContactService(MongoDB.client);
-    const document = await contactService.delete(req.params.id);
+    const customerService = new CustomerService(MongoDB.client);
+
+    const document = await customerService.delete(req.params.id);
     if (!document) {
       return next(new ApiError(404, "Contact not found"));
     }
@@ -88,24 +89,12 @@ exports.delete = async (req, res, next) => {
   }
 };
 
-//Find all favorite contacts of a user
-exports.findAllFavorite = async (_req, res, next) => {
-  try {
-    const contactService = new ContactService(MongoDB.client);
-    const documents = await contactService.findFavorite();
-    return res.send(documents);
-  } catch (error) {
-    return next(
-      new ApiError(500, "An error occurred while retrieving favorite contacts")
-    );
-  }
-};
-
 //Delete all contacts of a user from the database
 exports.deleteAll = async (_req, res, next) => {
   try {
-    const contactService = new ContactService(MongoDB.client);
-    const deletedCount = await contactService.deleteAll();
+    const customerService = new CustomerService(MongoDB.client);
+
+    const deletedCount = await customerService.deleteAll();
     return res.send({
       message: `${deletedCount} contacts were deleted successfully`,
     });
